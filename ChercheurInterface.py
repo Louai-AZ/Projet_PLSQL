@@ -5,7 +5,8 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import pyqtSignal
 import psycopg2
-from AjouterChercheurDialog import AjouterChercheurDialog  
+from AjouterChercheurDialog import AjouterChercheurDialog
+from MainDashboard import MainDashboard  
 
 
 class ChercheurInterface(QMainWindow):
@@ -40,6 +41,10 @@ class ChercheurInterface(QMainWindow):
         self.btn_consulter_articles = QPushButton("Consulter Articles", self)
         self.btn_consulter_articles.clicked.connect(self.consulter_articles)
         self.layout.addWidget(self.btn_consulter_articles)
+        
+        self.btn_back = QPushButton("Back to Main Dashboard", self)
+        self.btn_back.clicked.connect(self.return_to_main_dashboard)
+        self.layout.addWidget(self.btn_back)
 
         self.central_widget.setLayout(self.layout)
 
@@ -106,6 +111,10 @@ class ChercheurInterface(QMainWindow):
     def consulter_articles(self):
         print("Consulter Articles clicked")
 
+    def return_to_main_dashboard(self):
+        self.close()
+        main_dashboard = MainDashboard()
+        main_dashboard.show()
 
     def handle_chercheur_selection(self, row, col):
         chercheur_info = {}
