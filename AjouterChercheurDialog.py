@@ -44,6 +44,7 @@ class AjouterChercheurDialog(QDialog):
         self.faculty_combo = QComboBox(self)
         self.populate_faculty_combo()
         self.layout.addRow("Faculté:", self.faculty_combo)
+        self.faculty_combo.currentTextChanged.connect(self.on_faculty_combo_change)
 
         self.lab_combo = QComboBox(self)
         self.populate_lab_combo()
@@ -61,14 +62,12 @@ class AjouterChercheurDialog(QDialog):
 
     def populate_faculty_combo(self):
         # Fetch faculty names from the database and populate the combo box
-        # Replace the connection details with your actual database connection
         connection = psycopg2.connect(
             host="localhost",
             database="biblio",
             user="postgres",
             password="HOLUX"
         )
-
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT facnom FROM Faculte")
@@ -80,7 +79,10 @@ class AjouterChercheurDialog(QDialog):
 
     def populate_lab_combo(self):
         # Fetch laboratory names based on the selected faculty and populate the combo box
-        # Replace the connection details with your actual database connection
+        selected_faculty = self.faculty_combo.currentText()
+
+        if not selected_faculty:
+            return
         connection = psycopg2.connect(
             host="localhost",
             database="biblio",
@@ -90,17 +92,22 @@ class AjouterChercheurDialog(QDialog):
 
         try:
             with connection.cursor() as cursor:
-                selected_faculty = self.faculty_combo.currentText()
                 cursor.execute("SELECT labnom FROM Laboratoire WHERE facno = (SELECT facno FROM Faculte WHERE facnom = %s)", (selected_faculty,))
                 labs = cursor.fetchall()
+                self.lab_combo.clear()
                 self.lab_combo.addItems([lab[0] for lab in labs])
 
         finally:
             connection.close()
 
     def populate_supervisor_combo(self):
-        # Fetch names of supervisors (A, MA, PR, MC) from the database and populate the combo box
-        # Replace the connection details with your actual database connection
+        # Fetch names of supervisors (A, MA, PR, MC) working in the selected lab and faculty
+        selected_faculty = self.faculty_combo.currentText()
+        selected_lab = self.lab_combo.currentText()
+
+        if not selected_faculty or not selected_lab:
+            return
+
         connection = psycopg2.connect(
             host="localhost",
             database="biblio",
@@ -110,12 +117,18 @@ class AjouterChercheurDialog(QDialog):
 
         try:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT chnom FROM Chercheur WHERE grade IN ('A', 'MA', 'PR', 'MC')")
+                cursor.execute("SELECT chnom FROM Chercheur WHERE grade IN ('A', 'MA', 'PR', 'MC') AND labno = (SELECT labno FROM Laboratoire WHERE labnom = %s AND facno = (SELECT facno FROM Faculte WHERE facnom = %s))", (selected_lab, selected_faculty))
                 supervisors = cursor.fetchall()
+                self.supervisor_combo.clear()
                 self.supervisor_combo.addItems([sup[0] for sup in supervisors])
 
         finally:
             connection.close()
+
+    def on_faculty_combo_change(self):
+        # Update lab combo and supervisor combo when the faculty combo changes
+        self.populate_lab_combo()
+        self.populate_supervisor_combo()
 
     def ajouter_chercheur(self):
         try:
@@ -128,9 +141,9 @@ class AjouterChercheurDialog(QDialog):
                 "salaire": float(self.salaire_edit.text()),
                 "prime": float(self.prime_edit.text()),
                 "email": self.email_edit.text(),
-                "supno": self.get_supervisor_chno(),
-                "labno": self.get_labno(),
-                "facno": self.get_facno()
+                "supno": self.supervisor_combo(),
+                "labno": self.lab_combo.text(),
+                "facno": self.faculty_combo.text()
                 # Add other parameters as needed
             }
 
@@ -148,6 +161,9 @@ class AjouterChercheurDialog(QDialog):
         except Exception as e:
             # Display an error message in a small interface
             self.show_error_message(str(e))
+
+
+
 
     def get_facno_from_name(self, fac_name):
         # Fetch facno based on the selected faculty name from the database
@@ -168,9 +184,8 @@ class AjouterChercheurDialog(QDialog):
         finally:
             connection.close()
 
-    def get_labno_from_name(self, lab_name):
-        # Fetch labno based on the selected laboratory name from the database
-        # Replace the connection details with your actual database connection
+    def get_labno_from_name(self, lab_name, fac_name):
+        # Fetch labno based on the selected laboratory name and faculty from the database
         connection = psycopg2.connect(
             host="localhost",
             database="biblio",
@@ -180,14 +195,18 @@ class AjouterChercheurDialog(QDialog):
 
         try:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT labno FROM Laboratoire WHERE labnom = %s", (lab_name,))
+                cursor.execute(
+                    "SELECT labno FROM Laboratoire WHERE labnom = %s AND facno = (SELECT facno FROM Faculte WHERE facnom = %s)",
+                    (lab_name, fac_name)
+                )
                 labno = cursor.fetchone()
                 return labno[0] if labno else None
 
         finally:
             connection.close()
 
-    def get_supervisor_chno_from_name(self, sup_name):
+
+    def get_supervisor_chno_from_name(self, sup_name, fac_name, lab_name):
         # Fetch chno of the selected supervisor from the database
         # Replace the connection details with your actual database connection
         connection = psycopg2.connect(
@@ -199,31 +218,33 @@ class AjouterChercheurDialog(QDialog):
 
         try:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT chno FROM Chercheur WHERE chnom = %s", (sup_name,))
+                cursor.execute("SELECT chno FROM Chercheur WHERE chnom = %s AND facno = (SELECT facno FROM Faculte WHERE facnom = %s) AND labno = (SELECT labno FROM Laboratoire WHERE labnom = %s AND facno = (SELECT facno FROM Faculte WHERE facnom = %s))",
+                            (sup_name, fac_name, lab_name, fac_name))
                 supervisor_chno = cursor.fetchone()
                 return supervisor_chno[0] if supervisor_chno else None
 
         finally:
             connection.close()
 
-    def get_supervisor_chno(self):
-        # Fetch chno of the selected supervisor from the database
-        # Replace the connection details with your actual database connection
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
 
-        try:
-            with connection.cursor() as cursor:
-                selected_supervisor = self.supervisor_combo.currentText()
-                cursor.execute("SELECT chno FROM Chercheur WHERE chnom = %s", (selected_supervisor,))
-                supervisor_chno = cursor.fetchone()
-                return supervisor_chno[0] if supervisor_chno else None
+    # def get_supervisor_chno(self):
+    #     # Fetch chno of the selected supervisor from the database
+    #     connection = psycopg2.connect(
+    #         host="localhost",
+    #         database="biblio",
+    #         user="postgres",
+    #         password="HOLUX"
+    #     )
 
-        finally:
-            connection
+    #     try:
+    #         with connection.cursor() as cursor:
+    #             selected_supervisor = self.supervisor_combo.currentText()
+    #             cursor.execute("SELECT chno FROM Chercheur WHERE chnom = %s", (selected_supervisor,))
+    #             supervisor_chno = cursor.fetchone()
+    #             return supervisor_chno[0] if supervisor_chno else None
 
+    #     finally:
+    #         connection
 
+    def show_error_message(self, message):
+            QMessageBox.critical(self, "Error", message, QMessageBox.Ok)
