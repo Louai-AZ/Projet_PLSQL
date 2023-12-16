@@ -18,7 +18,6 @@ class AjouterChercheurDialog(QDialog):
 
         self.layout = QFormLayout()
 
-        # Add input fields for chercheur information
         self.chno_edit = QLineEdit(self)
         self.layout.addRow("Chno:", self.chno_edit)
 
@@ -46,7 +45,6 @@ class AjouterChercheurDialog(QDialog):
         self.email_edit = QLineEdit(self)
         self.layout.addRow("Email:", self.email_edit)
 
-        # Add combo boxes for faculties, laboratories, and supervisors
         self.faculty_combo = QComboBox(self)
         self.populate_faculty_combo()
         self.layout.addRow("Faculté:", self.faculty_combo)
@@ -85,7 +83,6 @@ class AjouterChercheurDialog(QDialog):
 
 
     def populate_lab_combo(self):
-        # Fetch laboratory names based on the selected faculty and populate the combo box
         selected_faculty = self.faculty_combo.currentText()
 
         if not selected_faculty:
@@ -110,7 +107,6 @@ class AjouterChercheurDialog(QDialog):
 
 
     def populate_supervisor_combo(self):
-        # Fetch names of supervisors (A, MA, PR, MC) working in the selected lab and faculty
         selected_faculty = self.faculty_combo.currentText()
         selected_lab = self.lab_combo.currentText()
 
@@ -139,40 +135,12 @@ class AjouterChercheurDialog(QDialog):
 
 
     def on_faculty_combo_change(self):
-        # Update lab combo and supervisor combo when the faculty combo changes
         self.populate_lab_combo()
         self.populate_supervisor_combo()
 
 
-    # def ajouter_chercheur(self):
-    #     try:
-    #         chercheur_info = {
-    #             "chno": int(self.chno_edit.text()),
-    #             "chnom": self.chnom_edit.text(),
-    #             "grade": self.grade_combo.currentText(),
-    #             "statut": self.statut_combo.currentText(),
-    #             "daterecrut": self.daterecrut_edit.date().toString(Qt.ISODate),
-    #             "salaire": float(self.salaire_edit.text()),
-    #             "prime": float(self.prime_edit.text()),
-    #             "email": self.email_edit.text(),
-    #             "supno": int(self.supervisor_combo.currentText().split("(ChNo: ")[1].split(")")[0]),
-    #             "labno": int(self.lab_combo.currentText().split("(LabNo: ")[1].split(")")[0]),
-    #             "facno": int(self.faculty_combo.currentText().split("(FacNo: ")[1].split(")")[0])
-    #         }
-
-    #         self.ajouter_chercheur(chercheur_info)
-
-    #         # Close the dialog
-    #         self.accept()
-
-    #     except Exception as e:
-    #         # Display an error message in a small interface
-    #         self.show_error_message(str(e))
-
-
     def ajouter_chercheur(self):
         try:
-            # Retrieve attribute values from the fields
             chno = int(self.chno_edit.text())
             chnom = self.chnom_edit.text()
             grade = self.grade_combo.currentText()
@@ -185,44 +153,33 @@ class AjouterChercheurDialog(QDialog):
             labno = int(self.lab_combo.currentText().split("(LabNo: ")[1].split(")")[0])
             facno = int(self.faculty_combo.currentText().split("(FacNo: ")[1].split(")")[0])
 
-            # Call the stored procedure to add chercheur to the database
             self.ajouter_chercheur_procedure(chno, chnom, grade, statut, daterecrut, salaire, prime, email, supno, labno, facno)
 
-            # Close the dialog
             self.accept()
 
         except Exception as e:
-            # Display an error message in a small interface
             self.show_error_message(str(e))
 
 
     def ajouter_chercheur_procedure(self, chno, chnom, grade, statut, daterecrut, salaire, prime, email, supno, labno, facno):
         try:
-            # Establish a connection to the PostgreSQL database
             connection = psycopg2.connect(
                 host="localhost",
                 database="biblio",
                 user="postgres",
                 password="HOLUX"
             )
-
-            # Create a cursor to execute SQL commands
             with connection.cursor() as cursor:
-                # Call the stored procedure with the required parameters
-                cursor.callproc('ajouter_chercheur', (
+                cursor.execute(' Call ajouter_chercheur(%s, %s,%s, %s,%s, %s,%s, %s,%s, %s,%s)', (
                     chno, chnom, grade, statut, daterecrut,
                     salaire, prime, email, supno, labno, facno
                 ))
-
-            # Commit the transaction
-            connection.commit()
+            connection.commit() 
 
         except psycopg2.Error as e:
-            # Handle any exceptions that might occur during the database operation
             print(f"Error: {e}")
 
         finally:
-            # Close the database connection
             connection.close()
 
 
@@ -230,9 +187,3 @@ class AjouterChercheurDialog(QDialog):
     def show_error_message(self, message):
             QMessageBox.critical(self, "Error", message, QMessageBox.Ok)
 
-
-# if __name__ == "__main__":
-#     app = QApplication(sys.argv)
-#     window = AjouterChercheurDialog()
-#     window.show()
-#     sys.exit(app.exec_())
