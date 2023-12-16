@@ -50,6 +50,7 @@ class ChercheurInterface(QMainWindow):
         # Connect the signal to handle the selected chercheur
         self.table_chercheurs.cellClicked.connect(self.handle_chercheur_selection)
 
+
     def populate_chercheurs(self):
         # Connect to your PostgreSQL database
         connection = psycopg2.connect(
@@ -88,12 +89,14 @@ class ChercheurInterface(QMainWindow):
 
         connection.close()
 
+
     def show_ajouter_chercheur_dialog(self):
         dialog = AjouterChercheurDialog(self)
         if dialog.exec_():
             # Dialog was accepted (user clicked "Ajouter" in the dialog)
             chercheur_info = dialog.get_chercheur_info()
             self.chercheur_selected.emit(chercheur_info)
+
 
     def modifier_chercheur(self):
         # Implement logic to modify the selected chercheur
@@ -107,6 +110,7 @@ class ChercheurInterface(QMainWindow):
         # Implement logic to consult articles for the selected chercheur
         print("Consulter Articles clicked")
 
+
     def handle_chercheur_selection(self, row, col):
         # Retrieve chercheur information for the selected row
         chercheur_info = {}
@@ -115,7 +119,6 @@ class ChercheurInterface(QMainWindow):
             item = self.table_chercheurs.item(row, col)
             if item:
                 chercheur_info[header] = item.text()
-
         # Emit the signal with the selected chercheur's information
         self.chercheur_selected.emit(chercheur_info)
 

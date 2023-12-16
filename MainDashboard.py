@@ -4,6 +4,7 @@ import psycopg2
 from ChercheurInterface import ChercheurInterface  
 
 class MainDashboard(QMainWindow):
+    
     def __init__(self):
         super().__init__()
 
@@ -41,6 +42,7 @@ class MainDashboard(QMainWindow):
         self.layout.addWidget(self.btn_publications)
 
         self.central_widget.setLayout(self.layout)
+
 
     def display_overview(self):
         # Connect to your PostgreSQL database
@@ -97,17 +99,21 @@ class MainDashboard(QMainWindow):
         chercheur_interface.show()
         print("Chercheurs Section clicked")
 
+
     def show_laboratoires_section(self):
         # Implement logic to show the Laboratoires section
         print("Laboratoires Section clicked")
+
 
     def show_facultes_section(self):
         # Implement logic to show the Facultes section
         print("Facultes Section clicked")
 
+
     def show_publications_section(self):
         # Implement logic to show the Publications section
         print("Publications Section clicked")
+
 
 
 if __name__ == "__main__":

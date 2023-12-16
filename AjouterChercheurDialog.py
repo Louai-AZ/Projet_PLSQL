@@ -3,6 +3,7 @@ from PyQt5.QtCore import Qt, QDate
 import psycopg2
 
 class AjouterChercheurDialog(QDialog):
+    
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -63,9 +64,9 @@ class AjouterChercheurDialog(QDialog):
         # Replace the connection details with your actual database connection
         connection = psycopg2.connect(
             host="localhost",
-            database="your_database",
-            user="your_user",
-            password="your_password"
+            database="biblio",
+            user="postgres",
+            password="HOLUX"
         )
 
         try:
@@ -82,9 +83,9 @@ class AjouterChercheurDialog(QDialog):
         # Replace the connection details with your actual database connection
         connection = psycopg2.connect(
             host="localhost",
-            database="your_database",
-            user="your_user",
-            password="your_password"
+            database="biblio",
+            user="postgres",
+            password="HOLUX"
         )
 
         try:
@@ -102,9 +103,9 @@ class AjouterChercheurDialog(QDialog):
         # Replace the connection details with your actual database connection
         connection = psycopg2.connect(
             host="localhost",
-            database="your_database",
-            user="your_user",
-            password="your_password"
+            database="biblio",
+            user="postgres",
+            password="HOLUX"
         )
 
         try:
@@ -133,6 +134,11 @@ class AjouterChercheurDialog(QDialog):
                 # Add other parameters as needed
             }
 
+            # Fetch facno, labno, and supno based on selected names
+            chercheur_info["facno"] = self.get_facno_from_name(chercheur_info["facno"])
+            chercheur_info["labno"] = self.get_labno_from_name(chercheur_info["labno"])
+            chercheur_info["supno"] = self.get_supervisor_chno_from_name(chercheur_info["supno"])
+
             # Call the stored procedure to add chercheur to the database
             self.add_chercheur_to_database(chercheur_info)
 
@@ -143,14 +149,71 @@ class AjouterChercheurDialog(QDialog):
             # Display an error message in a small interface
             self.show_error_message(str(e))
 
+    def get_facno_from_name(self, fac_name):
+        # Fetch facno based on the selected faculty name from the database
+        # Replace the connection details with your actual database connection
+        connection = psycopg2.connect(
+            host="localhost",
+            database="biblio",
+            user="postgres",
+            password="HOLUX"
+        )
+
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT facno FROM Faculte WHERE facnom = %s", (fac_name,))
+                facno = cursor.fetchone()
+                return facno[0] if facno else None
+
+        finally:
+            connection.close()
+
+    def get_labno_from_name(self, lab_name):
+        # Fetch labno based on the selected laboratory name from the database
+        # Replace the connection details with your actual database connection
+        connection = psycopg2.connect(
+            host="localhost",
+            database="biblio",
+            user="postgres",
+            password="HOLUX"
+        )
+
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT labno FROM Laboratoire WHERE labnom = %s", (lab_name,))
+                labno = cursor.fetchone()
+                return labno[0] if labno else None
+
+        finally:
+            connection.close()
+
+    def get_supervisor_chno_from_name(self, sup_name):
+        # Fetch chno of the selected supervisor from the database
+        # Replace the connection details with your actual database connection
+        connection = psycopg2.connect(
+            host="localhost",
+            database="biblio",
+            user="postgres",
+            password="HOLUX"
+        )
+
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT chno FROM Chercheur WHERE chnom = %s", (sup_name,))
+                supervisor_chno = cursor.fetchone()
+                return supervisor_chno[0] if supervisor_chno else None
+
+        finally:
+            connection.close()
+
     def get_supervisor_chno(self):
         # Fetch chno of the selected supervisor from the database
         # Replace the connection details with your actual database connection
         connection = psycopg2.connect(
             host="localhost",
-            database="your_database",
-            user="your_user",
-            password="your_password"
+            database="biblio",
+            user="postgres",
+            password="HOLUX"
         )
 
         try:
@@ -162,3 +225,5 @@ class AjouterChercheurDialog(QDialog):
 
         finally:
             connection
+
+
