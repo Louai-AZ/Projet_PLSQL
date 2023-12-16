@@ -1,13 +1,12 @@
 import sys
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout,
-    QPushButton, QWidget, QTableWidget, QTableWidgetItem
+    QPushButton, QWidget, QTableWidget, QTableWidgetItem,QDialog,QMessageBox
 )
 from PyQt5.QtCore import pyqtSignal
 import psycopg2
 from AjouterChercheurDialog import AjouterChercheurDialog
-from MainDashboard import MainDashboard  
-
+from ConfirmationDialog import ConfirmationDialog
 
 class ChercheurInterface(QMainWindow):
     chercheur_selected = pyqtSignal(dict)
@@ -43,7 +42,7 @@ class ChercheurInterface(QMainWindow):
         self.layout.addWidget(self.btn_consulter_articles)
         
         self.btn_back = QPushButton("Back to Main Dashboard", self)
-        self.btn_back.clicked.connect(self.return_to_main_dashboard)
+        #self.btn_back.clicked.connect(self.return_to_main_dashboard)
         self.layout.addWidget(self.btn_back)
 
         self.central_widget.setLayout(self.layout)
@@ -51,8 +50,8 @@ class ChercheurInterface(QMainWindow):
         self.populate_chercheurs()
 
         self.table_chercheurs.cellClicked.connect(self.handle_chercheur_selection)
-
-
+        
+        
     def populate_chercheurs(self):
         connection = psycopg2.connect(
             host="localhost",
@@ -101,20 +100,52 @@ class ChercheurInterface(QMainWindow):
     def handle_chercheur_added(self):
         self.populate_chercheurs()
 
-
     def modifier_chercheur(self):
         print("Modifier Chercheur clicked")
 
+
     def supprimer_chercheur(self):
-        print("Supprimer Chercheur clicked")
+        selected_row = self.table_chercheurs.currentRow()
+        if selected_row == -1:
+            self.show_error_message("Veuillez sélectionner un chercheur à supprimer.")
+            
+        chno_item = self.table_chercheurs.item(selected_row, 0)
+        if chno_item is None:
+            self.show_error_message("Erreur lors de la récupération du numéro de chercheur.")
+            return
+
+        chno = int(chno_item.text())
+
+        confirmation_dialog = ConfirmationDialog(chno)
+        result = confirmation_dialog.exec_()
+
+        if result == QDialog.Accepted:
+            self.delete_chercheur(chno)
+            self.populate_chercheurs() 
+    def delete_chercheur(self, chno):
+        try:
+            connection = psycopg2.connect(
+                host="localhost",
+                database="biblio",
+                user="postgres",
+                password="HOLUX"
+            )
+
+            with connection.cursor() as cursor:
+                cursor.execute('Call supprimer_chercheur(%s)', (chno,))
+
+            connection.commit()
+
+        except psycopg2.Error as e:
+            self.show_error_message(str(e))
+
+        finally:
+            connection.close()
+
 
     def consulter_articles(self):
         print("Consulter Articles clicked")
 
-    def return_to_main_dashboard(self):
-        self.close()
-        main_dashboard = MainDashboard()
-        main_dashboard.show()
 
     def handle_chercheur_selection(self, row, col):
         chercheur_info = {}
@@ -124,6 +155,10 @@ class ChercheurInterface(QMainWindow):
             if item:
                 chercheur_info[header] = item.text()
         self.chercheur_selected.emit(chercheur_info)
+
+
+    def show_error_message(self, message):
+            QMessageBox.critical(self, "Error", message, QMessageBox.Ok)
 
 
 if __name__ == "__main__":

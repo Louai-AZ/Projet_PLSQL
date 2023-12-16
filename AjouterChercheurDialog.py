@@ -1,15 +1,12 @@
-import sys
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QLabel, QVBoxLayout, QHBoxLayout,
-    QPushButton, QWidget, QTableWidget, QTableWidgetItem, QGroupBox ,
+    QPushButton,
     QDialog, QFormLayout, QLineEdit, QComboBox, QPushButton, QMessageBox, QDateEdit
 )
-from PyQt5.QtCore import pyqtSignal,Qt, QDate
+from PyQt5.QtCore import Qt, QDate
 import psycopg2
 
 
-class AjouterChercheurDialog(QDialog):
-    
+class AjouterChercheurDialog(QDialog):   
     def __init__(self, parent=None):
         super().__init__(parent)
 
