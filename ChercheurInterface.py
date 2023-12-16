@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QLabel, QVBoxLayout, QHBoxLayout,
-    QPushButton, QWidget, QTableWidget, QTableWidgetItem, QGroupBox
+    QApplication, QMainWindow, QVBoxLayout,
+    QPushButton, QWidget, QTableWidget, QTableWidgetItem
 )
 from PyQt5.QtCore import pyqtSignal
 import psycopg2
@@ -93,8 +93,7 @@ class ChercheurInterface(QMainWindow):
                 self.chercheur_selected.emit(chercheur_info)
 
 
-    def handle_chercheur_added(self, chercheur_info):
-        print("Chercheur added:", chercheur_info)
+    def handle_chercheur_added(self):
         self.populate_chercheurs()
 
 
