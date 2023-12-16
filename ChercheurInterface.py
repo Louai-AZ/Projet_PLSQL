@@ -97,7 +97,6 @@ class ChercheurInterface(QMainWindow):
             chercheur_info = dialog.get_chercheur_info()
             self.chercheur_selected.emit(chercheur_info)
 
-
     def modifier_chercheur(self):
         # Implement logic to modify the selected chercheur
         print("Modifier Chercheur clicked")

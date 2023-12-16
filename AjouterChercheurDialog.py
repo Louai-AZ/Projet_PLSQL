@@ -1,6 +1,12 @@
-from PyQt5.QtWidgets import QDialog, QFormLayout, QLineEdit, QComboBox, QPushButton, QMessageBox, QDateEdit
-from PyQt5.QtCore import Qt, QDate
+import sys
+from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QLabel, QVBoxLayout, QHBoxLayout,
+    QPushButton, QWidget, QTableWidget, QTableWidgetItem, QGroupBox ,
+    QDialog, QFormLayout, QLineEdit, QComboBox, QPushButton, QMessageBox, QDateEdit
+)
+from PyQt5.QtCore import pyqtSignal,Qt, QDate
 import psycopg2
+
 
 class AjouterChercheurDialog(QDialog):
     
@@ -60,8 +66,8 @@ class AjouterChercheurDialog(QDialog):
 
         self.setLayout(self.layout)
 
+
     def populate_faculty_combo(self):
-        # Fetch faculty names from the database and populate the combo box
         connection = psycopg2.connect(
             host="localhost",
             database="biblio",
@@ -70,12 +76,13 @@ class AjouterChercheurDialog(QDialog):
         )
         try:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT facnom FROM Faculte")
+                cursor.execute("SELECT facno, facnom FROM Faculte")
                 faculties = cursor.fetchall()
-                self.faculty_combo.addItems([fac[0] for fac in faculties])
+                self.faculty_combo.addItems([f"{fac[1]} (FacNo: {fac[0]})" for fac in faculties])
 
         finally:
             connection.close()
+
 
     def populate_lab_combo(self):
         # Fetch laboratory names based on the selected faculty and populate the combo box
@@ -92,13 +99,15 @@ class AjouterChercheurDialog(QDialog):
 
         try:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT labnom FROM Laboratoire WHERE facno = (SELECT facno FROM Faculte WHERE facnom = %s)", (selected_faculty,))
+                facno = selected_faculty.split("(FacNo: ")[1].split(")")[0]
+                cursor.execute("SELECT labno, labnom FROM Laboratoire WHERE facno = %s", (facno,))
                 labs = cursor.fetchall()
                 self.lab_combo.clear()
-                self.lab_combo.addItems([lab[0] for lab in labs])
+                self.lab_combo.addItems([f"{lab[1]} (LabNo: {lab[0]})" for lab in labs])
 
         finally:
             connection.close()
+
 
     def populate_supervisor_combo(self):
         # Fetch names of supervisors (A, MA, PR, MC) working in the selected lab and faculty
@@ -117,43 +126,67 @@ class AjouterChercheurDialog(QDialog):
 
         try:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT chnom FROM Chercheur WHERE grade IN ('A', 'MA', 'PR', 'MC') AND labno = (SELECT labno FROM Laboratoire WHERE labnom = %s AND facno = (SELECT facno FROM Faculte WHERE facnom = %s))", (selected_lab, selected_faculty))
+                facno = selected_faculty.split("(FacNo: ")[1].split(")")[0]
+                labno = selected_lab.split("(LabNo: ")[1].split(")")[0]
+                cursor.execute("SELECT chno, chnom FROM Chercheur WHERE grade IN ('A', 'MA', 'PR', 'MC') AND labno = %s AND facno = %s",
+                            (labno, facno))
                 supervisors = cursor.fetchall()
                 self.supervisor_combo.clear()
-                self.supervisor_combo.addItems([sup[0] for sup in supervisors])
+                self.supervisor_combo.addItems([f"{sup[1]} (ChNo: {sup[0]})" for sup in supervisors])
 
         finally:
             connection.close()
+
 
     def on_faculty_combo_change(self):
         # Update lab combo and supervisor combo when the faculty combo changes
         self.populate_lab_combo()
         self.populate_supervisor_combo()
 
+
+    # def ajouter_chercheur(self):
+    #     try:
+    #         chercheur_info = {
+    #             "chno": int(self.chno_edit.text()),
+    #             "chnom": self.chnom_edit.text(),
+    #             "grade": self.grade_combo.currentText(),
+    #             "statut": self.statut_combo.currentText(),
+    #             "daterecrut": self.daterecrut_edit.date().toString(Qt.ISODate),
+    #             "salaire": float(self.salaire_edit.text()),
+    #             "prime": float(self.prime_edit.text()),
+    #             "email": self.email_edit.text(),
+    #             "supno": int(self.supervisor_combo.currentText().split("(ChNo: ")[1].split(")")[0]),
+    #             "labno": int(self.lab_combo.currentText().split("(LabNo: ")[1].split(")")[0]),
+    #             "facno": int(self.faculty_combo.currentText().split("(FacNo: ")[1].split(")")[0])
+    #         }
+
+    #         self.ajouter_chercheur(chercheur_info)
+
+    #         # Close the dialog
+    #         self.accept()
+
+    #     except Exception as e:
+    #         # Display an error message in a small interface
+    #         self.show_error_message(str(e))
+
+
     def ajouter_chercheur(self):
         try:
-            chercheur_info = {
-                "chno": int(self.chno_edit.text()),
-                "chnom": self.chnom_edit.text(),
-                "grade": self.grade_combo.currentText(),
-                "statut": self.statut_combo.currentText(),
-                "daterecrut": self.daterecrut_edit.date().toString(Qt.ISODate),
-                "salaire": float(self.salaire_edit.text()),
-                "prime": float(self.prime_edit.text()),
-                "email": self.email_edit.text(),
-                "supno": self.supervisor_combo(),
-                "labno": self.lab_combo.text(),
-                "facno": self.faculty_combo.text()
-                # Add other parameters as needed
-            }
-
-            # Fetch facno, labno, and supno based on selected names
-            chercheur_info["facno"] = self.get_facno_from_name(chercheur_info["facno"])
-            chercheur_info["labno"] = self.get_labno_from_name(chercheur_info["labno"])
-            chercheur_info["supno"] = self.get_supervisor_chno_from_name(chercheur_info["supno"])
+            # Retrieve attribute values from the fields
+            chno = int(self.chno_edit.text())
+            chnom = self.chnom_edit.text()
+            grade = self.grade_combo.currentText()
+            statut = self.statut_combo.currentText()
+            daterecrut = self.daterecrut_edit.date().toString(Qt.ISODate)
+            salaire = float(self.salaire_edit.text())
+            prime = float(self.prime_edit.text())
+            email = self.email_edit.text()
+            supno = int(self.supervisor_combo.currentText().split("(ChNo: ")[1].split(")")[0])
+            labno = int(self.lab_combo.currentText().split("(LabNo: ")[1].split(")")[0])
+            facno = int(self.faculty_combo.currentText().split("(FacNo: ")[1].split(")")[0])
 
             # Call the stored procedure to add chercheur to the database
-            self.add_chercheur_to_database(chercheur_info)
+            self.ajouter_chercheur_procedure(chno, chnom, grade, statut, daterecrut, salaire, prime, email, supno, labno, facno)
 
             # Close the dialog
             self.accept()
@@ -163,88 +196,43 @@ class AjouterChercheurDialog(QDialog):
             self.show_error_message(str(e))
 
 
-
-
-    def get_facno_from_name(self, fac_name):
-        # Fetch facno based on the selected faculty name from the database
-        # Replace the connection details with your actual database connection
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
-
+    def ajouter_chercheur_procedure(self, chno, chnom, grade, statut, daterecrut, salaire, prime, email, supno, labno, facno):
         try:
+            # Establish a connection to the PostgreSQL database
+            connection = psycopg2.connect(
+                host="localhost",
+                database="biblio",
+                user="postgres",
+                password="HOLUX"
+            )
+
+            # Create a cursor to execute SQL commands
             with connection.cursor() as cursor:
-                cursor.execute("SELECT facno FROM Faculte WHERE facnom = %s", (fac_name,))
-                facno = cursor.fetchone()
-                return facno[0] if facno else None
+                # Call the stored procedure with the required parameters
+                cursor.callproc('ajouter_chercheur', (
+                    chno, chnom, grade, statut, daterecrut,
+                    salaire, prime, email, supno, labno, facno
+                ))
+
+            # Commit the transaction
+            connection.commit()
+
+        except psycopg2.Error as e:
+            # Handle any exceptions that might occur during the database operation
+            print(f"Error: {e}")
 
         finally:
-            connection.close()
-
-    def get_labno_from_name(self, lab_name, fac_name):
-        # Fetch labno based on the selected laboratory name and faculty from the database
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
-
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "SELECT labno FROM Laboratoire WHERE labnom = %s AND facno = (SELECT facno FROM Faculte WHERE facnom = %s)",
-                    (lab_name, fac_name)
-                )
-                labno = cursor.fetchone()
-                return labno[0] if labno else None
-
-        finally:
+            # Close the database connection
             connection.close()
 
 
-    def get_supervisor_chno_from_name(self, sup_name, fac_name, lab_name):
-        # Fetch chno of the selected supervisor from the database
-        # Replace the connection details with your actual database connection
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
-
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT chno FROM Chercheur WHERE chnom = %s AND facno = (SELECT facno FROM Faculte WHERE facnom = %s) AND labno = (SELECT labno FROM Laboratoire WHERE labnom = %s AND facno = (SELECT facno FROM Faculte WHERE facnom = %s))",
-                            (sup_name, fac_name, lab_name, fac_name))
-                supervisor_chno = cursor.fetchone()
-                return supervisor_chno[0] if supervisor_chno else None
-
-        finally:
-            connection.close()
-
-
-    # def get_supervisor_chno(self):
-    #     # Fetch chno of the selected supervisor from the database
-    #     connection = psycopg2.connect(
-    #         host="localhost",
-    #         database="biblio",
-    #         user="postgres",
-    #         password="HOLUX"
-    #     )
-
-    #     try:
-    #         with connection.cursor() as cursor:
-    #             selected_supervisor = self.supervisor_combo.currentText()
-    #             cursor.execute("SELECT chno FROM Chercheur WHERE chnom = %s", (selected_supervisor,))
-    #             supervisor_chno = cursor.fetchone()
-    #             return supervisor_chno[0] if supervisor_chno else None
-
-    #     finally:
-    #         connection
 
     def show_error_message(self, message):
             QMessageBox.critical(self, "Error", message, QMessageBox.Ok)
+
+
+# if __name__ == "__main__":
+#     app = QApplication(sys.argv)
+#     window = AjouterChercheurDialog()
+#     window.show()
+#     sys.exit(app.exec_())
