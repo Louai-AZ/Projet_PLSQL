@@ -5,6 +5,7 @@ from Chercheur.ChercheurInterface import ChercheurInterface
 from Publication.PublicationInterface import PublicationInterface
 from Laboratoire.LaboratoireInterface import LaboratoireInterface
 from Faculte.FaculteInterface import FaculteInterface
+from Config import connect_to_database
 
 class MainDashboard(QMainWindow):
     
@@ -51,12 +52,7 @@ class MainDashboard(QMainWindow):
 
 
     def display_overview(self):
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
+        connection = connect_to_database()
 
         with connection.cursor() as cursor:
             cursor.execute("""

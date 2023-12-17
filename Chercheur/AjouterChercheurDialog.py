@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt, QDate
 import psycopg2
-
+from Config import connect_to_database
 
 class AjouterChercheurDialog(QDialog):   
     def __init__(self, parent=None):
@@ -65,12 +65,7 @@ class AjouterChercheurDialog(QDialog):
 
 
     def populate_faculty_combo(self):
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
+        connection = connect_to_database()
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT facno, facnom FROM Faculte")
@@ -85,12 +80,7 @@ class AjouterChercheurDialog(QDialog):
 
         if not selected_faculty:
             return
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
+        connection = connect_to_database()
 
         try:
             with connection.cursor() as cursor:
@@ -110,12 +100,7 @@ class AjouterChercheurDialog(QDialog):
         if not selected_faculty or not selected_lab:
             return
 
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
+        connection = connect_to_database()
 
         try:
             with connection.cursor() as cursor:
@@ -154,12 +139,7 @@ class AjouterChercheurDialog(QDialog):
             supno = int(self.supervisor_combo.currentText().split("(ChNo: ")[1].split(")")[0]) if self.supervisor_combo.currentText().isnumeric else None
             labno = int(self.lab_combo.currentText().split("(LabNo: ")[1].split(")")[0]) if self.lab_combo.currentText().isnumeric else None
             facno = int(self.faculty_combo.currentText().split("(FacNo: ")[1].split(")")[0]) if self.faculty_combo.currentText().isnumeric else None
-            connection = psycopg2.connect(
-                host="localhost",
-                database="biblio",
-                user="postgres",
-                password="HOLUX"
-            )
+            connection = connect_to_database()
             with connection.cursor() as cursor:
                 cursor.execute(' Call ajouter_chercheur(%s, %s,%s, %s,%s, %s,%s, %s,%s, %s,%s)', (
                     chno, chnom, grade, statut, daterecrut,

@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QDialog, QFormLayout, QLineEdit, QComboBox, QPushButton, QMessageBox, QDateEdit
 from PyQt5.QtCore import Qt, QDate
 import psycopg2
+from Config import connect_to_database
 
 class AjouterFaculteDialog(QDialog):
 
@@ -37,12 +38,8 @@ class AjouterFaculteDialog(QDialog):
             adresse = self.adresse_edit.text(),
             libelle = self.libelle_edit.text() 
         
-            connection = psycopg2.connect(
-                host="localhost",
-                database="biblio",
-                user="postgres",
-                password="HOLUX"
-            )
+            connection = connect_to_database()
+            
             with connection.cursor() as cursor:
                 cursor.execute("Insert Into Faculte Values (%s, %s,%s, %s)",(facno,facnom,adresse,libelle)
                             )

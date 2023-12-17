@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt, QDate
 import psycopg2
-
+from Config import connect_to_database
 
 class ChercheurModificationDialog(QDialog):
     
@@ -79,12 +79,7 @@ class ChercheurModificationDialog(QDialog):
     
     
     def populate_faculty_combo(self):
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
+        connection = connect_to_database()
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT facno, facnom FROM Faculte")
@@ -99,12 +94,7 @@ class ChercheurModificationDialog(QDialog):
 
         if not selected_faculty:
             return
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
+        connection = connect_to_database()
 
         try:
             with connection.cursor() as cursor:
@@ -124,12 +114,7 @@ class ChercheurModificationDialog(QDialog):
         if not selected_faculty or not selected_lab:
             return
 
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
+        connection = connect_to_database()
 
         try:
             with connection.cursor() as cursor:
@@ -169,12 +154,7 @@ class ChercheurModificationDialog(QDialog):
         modified_lab = int(self.lab_combo.currentText().split("(LabNo: ")[1].split(")")[0]) if self.lab_combo.currentText() else None
         modified_supervisor = int(self.supervisor_combo.currentText().split("(ChNo: ")[1].split(")")[0]) if self.supervisor_combo.currentText() else None
 
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
+        connection = connect_to_database()
         
         try:
             with connection.cursor() as cursor:

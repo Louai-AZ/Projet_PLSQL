@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QTableWidgetItem, QDialog, QTableWidget, QWidget, QVBoxLayout, QLabel, QMessageBox
 from PyQt5.QtCore import Qt, QDate
 import psycopg2
+from Config import connect_to_database
 
 
 class BibliographieDialog(QDialog):
@@ -26,12 +27,7 @@ class BibliographieDialog(QDialog):
         self.central_widget.setLayout(self.layout)
 
     def populate_chercheurs(self,pubno):
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
+        connection = connect_to_database()
 
         with connection.cursor() as cursor:
             cursor.execute("""

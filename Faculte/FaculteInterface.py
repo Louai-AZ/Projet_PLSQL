@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import pyqtSignal
 import psycopg2
 from Faculte.AjouterFaculteDialog import AjouterFaculteDialog
+from Config import connect_to_database
 
 class FaculteInterface(QMainWindow):
     faculte_selected = pyqtSignal(dict)
@@ -34,12 +35,7 @@ class FaculteInterface(QMainWindow):
 
 
     def populate_Faculte(self):
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
+        connection = connect_to_database()
 
         with connection.cursor() as cursor:
             cursor.execute("""

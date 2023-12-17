@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QDialog, QFormLayout, QLineEdit, QComboBox, QPushButton, QDateEdit, QMessageBox
 from PyQt5.QtCore import Qt, QDate
 import psycopg2
+from Config import connect_to_database
 
 class AjouterLaboratoireDialog(QDialog):
 
@@ -29,12 +30,7 @@ class AjouterLaboratoireDialog(QDialog):
         self.setLayout(self.layout)
 
     def populate_faculty_combo(self):
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
+        connection = connect_to_database()
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT facno, facnom FROM Faculte")
@@ -45,12 +41,7 @@ class AjouterLaboratoireDialog(QDialog):
             connection.close()
 
     def ajouter_laboratoire(self):
-        connection = psycopg2.connect(
-                host="localhost",
-                database="biblio",
-                user="postgres",
-                password="HOLUX"
-            )  
+        connection = connect_to_database()
         try:     
             facno = int(self.faculty_combo.currentText().split("(FacNo: ")[1].split(")")[0]) if self.faculty_combo.currentText().isnumeric else None
             labno = int(self.labno_edit.text()) if self.labno_edit.text().isnumeric else None 

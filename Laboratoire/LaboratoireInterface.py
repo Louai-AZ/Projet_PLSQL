@@ -7,6 +7,7 @@ from PyQt5.QtCore import pyqtSignal
 import psycopg2
 from Laboratoire.AjouterLaboratoireDialog import AjouterLaboratoireDialog
 from Laboratoire.HierarchieDialog import HierarchieDialog
+from Config import connect_to_database
 
 class LaboratoireInterface(QMainWindow):
 
@@ -43,12 +44,7 @@ class LaboratoireInterface(QMainWindow):
 
 
     def populate_laboratoire(self):
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
+        connection = connect_to_database()
 
         with connection.cursor() as cursor:
             cursor.execute("""

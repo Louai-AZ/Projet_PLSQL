@@ -9,6 +9,7 @@ from Chercheur.AjouterChercheurDialog import AjouterChercheurDialog
 from Chercheur.ChercheurModificationDialog import ChercheurModificationDialog
 from Chercheur.ConfirmationDialog import ConfirmationDialog
 from Chercheur.PublicationInterface import PublicationInterface
+from Config import connect_to_database
 
 class ChercheurInterface(QMainWindow):
     chercheur_selected = pyqtSignal(dict)
@@ -52,12 +53,7 @@ class ChercheurInterface(QMainWindow):
         
         
     def populate_chercheurs(self):
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
+        connection = connect_to_database()
 
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -137,12 +133,7 @@ class ChercheurInterface(QMainWindow):
     
     def delete_chercheur(self, chno):
         try:
-            connection = psycopg2.connect(
-                host="localhost",
-                database="biblio",
-                user="postgres",
-                password="HOLUX"
-            )
+            connection = connect_to_database()
 
             with connection.cursor() as cursor:
                 cursor.execute('Call supprimer_chercheur(%s)', (chno,))

@@ -7,8 +7,7 @@ import psycopg2
 from PyQt5.QtCore import pyqtSignal
 from Publication.AjouterPublicationDialog import AjouterPublicationDialog
 from Publication.BibliographieDialog import BibliographieDialog
-from Publication.ExtraireBibliographieDialog import ExtraireBibliographieDialog
-
+from Config import connect_to_database
 
 class PublicationInterface(QMainWindow):
 
@@ -44,12 +43,7 @@ class PublicationInterface(QMainWindow):
 
 
     def populate_publication(self):
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
+        connection = connect_to_database()
 
         with connection.cursor() as cursor:
             cursor.execute("""

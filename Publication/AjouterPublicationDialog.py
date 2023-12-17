@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QDialog, QFormLayout, QLineEdit, QComboBox, QPushButton, QDateEdit,QMessageBox
 from PyQt5.QtCore import Qt, QDate
 import psycopg2
-
+from Config import connect_to_database
 
 class AjouterPublicationDialog(QDialog):
 
@@ -53,12 +53,7 @@ class AjouterPublicationDialog(QDialog):
         self.setLayout(self.layout)
 
     def populate_chercheur_combo(self):
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
+        connection = connect_to_database()
 
         try:
             with connection.cursor() as cursor:
@@ -71,12 +66,7 @@ class AjouterPublicationDialog(QDialog):
             connection.close()
 
     def ajouter_publication(self):
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
+        connection = connect_to_database()
         
         try:
             pubno = self.pubno_edit.text(),

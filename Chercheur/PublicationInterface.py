@@ -1,6 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QTableWidget, QTableWidgetItem, QWidget,QMessageBox
 import psycopg2
+from Config import connect_to_database
 
 class PublicationInterface(QDialog):
     def __init__(self, chno):
@@ -24,12 +25,7 @@ class PublicationInterface(QDialog):
         self.central_widget.setLayout(self.layout)
 
     def populate_publications(self, chno):
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
+        connection = connect_to_database()
 
         with connection.cursor() as cursor:
             cursor.execute("""
