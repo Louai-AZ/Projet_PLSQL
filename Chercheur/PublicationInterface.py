@@ -7,7 +7,7 @@ class PublicationInterface(QDialog):
         super().__init__()
 
         self.setWindowTitle("Publication Interface")
-        self.setGeometry(250, 250, 800, 500)
+        self.setGeometry(250, 250, 300, 300)
 
         self.central_widget = QWidget(self)
 
@@ -17,7 +17,7 @@ class PublicationInterface(QDialog):
         self.layout.addWidget(self.label)
 
         self.table_publications = QTableWidget(self)
-        self.layout.addWidget(self.table_publications)
+        self.layout.addWidget(self.table_publications, stretch=5)
 
         self.populate_publications(chno)
 
@@ -41,10 +41,6 @@ class PublicationInterface(QDialog):
 
             publications_data = cursor.fetchall()
 
-            print("*"*100)
-            print(publications_data)
-            print("*"*100)
-
             self.table_publications.setColumnCount(len(publications_data[0]))
             self.table_publications.setHorizontalHeaderLabels([
                 "Titre", "Theme","Apparition" ,"Editeur", "Rang"
@@ -57,3 +53,4 @@ class PublicationInterface(QDialog):
                     self.table_publications.setItem(row, col, item)
 
         connection.close()
+
