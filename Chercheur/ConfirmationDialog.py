@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QDate
 import psycopg2
 
-
 class ConfirmationDialog(QDialog):
     
     def __init__(self, chno):

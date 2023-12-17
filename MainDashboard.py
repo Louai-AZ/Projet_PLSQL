@@ -2,6 +2,10 @@ import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QPushButton, QWidget, QStackedWidget
 import psycopg2
 from Chercheur.ChercheurInterface import ChercheurInterface
+from Publication.PublicationInterface import PublicationInterface
+from Laboratoire.LaboratoireInterface import LaboratoireInterface
+from Faculte.FaculteInterface import FaculteInterface
+from Config import connect_to_database
 
 class MainDashboard(QMainWindow):
     
@@ -30,14 +34,17 @@ class MainDashboard(QMainWindow):
         self.layout.addWidget(self.btn_chercheurs)
         
         self.btn_laboratoires = QPushButton("Laboratoires Section")
+        self.laboratoire_interface = LaboratoireInterface()
         self.btn_laboratoires.clicked.connect(self.show_laboratoires_section)
         self.layout.addWidget(self.btn_laboratoires)
 
         self.btn_facultes = QPushButton("Facultes Section")
+        self.faculte_interface = FaculteInterface()
         self.btn_facultes.clicked.connect(self.show_facultes_section)
         self.layout.addWidget(self.btn_facultes)
 
         self.btn_publications = QPushButton("Publications Section")
+        self.publication_interface = PublicationInterface()
         self.btn_publications.clicked.connect(self.show_publications_section)
         self.layout.addWidget(self.btn_publications)
 
@@ -45,12 +52,7 @@ class MainDashboard(QMainWindow):
 
 
     def display_overview(self):
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
+        connection = connect_to_database()
 
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -95,17 +97,19 @@ class MainDashboard(QMainWindow):
 
 
     def show_laboratoires_section(self):
-        # Implement logic to show the Laboratoires section
-        print("Laboratoires Section clicked")
+        self.stacked_widget.addWidget(self.laboratoire_interface)
+        self.stacked_widget.setCurrentWidget(self.laboratoire_interface)
+
 
 
     def show_facultes_section(self):
-        # Implement logic to show the Facultes section
-        print("Facultes Section clicked")
+        self.stacked_widget.addWidget(self.faculte_interface)
+        self.stacked_widget.setCurrentWidget(self.faculte_interface)
 
 
     def show_publications_section(self):
-        # Implement logic to show the Publications section
-        print("Publications Section clicked")
+        self.stacked_widget.addWidget(self.publication_interface)
+        self.stacked_widget.setCurrentWidget(self.publication_interface)
+
 
 
