@@ -63,6 +63,7 @@ class AjouterChercheurDialog(QDialog):
         self.setLayout(self.layout)
 
 
+
     def populate_faculty_combo(self):
         connection = psycopg2.connect(
             host="localhost",
@@ -78,7 +79,7 @@ class AjouterChercheurDialog(QDialog):
 
         finally:
             connection.close()
-
+    
     def populate_lab_combo(self):
         selected_faculty = self.faculty_combo.currentText()
 
@@ -101,7 +102,7 @@ class AjouterChercheurDialog(QDialog):
 
         finally:
             connection.close()
-
+    
     def populate_supervisor_combo(self):
         selected_faculty = self.faculty_combo.currentText()
         selected_lab = self.lab_combo.currentText()
@@ -136,20 +137,23 @@ class AjouterChercheurDialog(QDialog):
     def on_labo_combo_change(self):
         self.populate_supervisor_combo()
 
+    def show_error_message(self, message):
+        QMessageBox.critical(self, "Error", message, QMessageBox.Ok)
+
 
     def ajouter_chercheur(self):
         try:            
-            chno = int(self.chno_edit.text()) if self.chno_edit.text() else None
+            chno = int(self.chno_edit.text()) if self.chno_edit.text().isnumeric else None
             chnom = self.chnom_edit.text()
             grade = self.grade_combo.currentText()
             statut = self.statut_combo.currentText()
             daterecrut = self.daterecrut_edit.date().toString(Qt.ISODate)
-            salaire = float(self.salaire_edit.text()) if self.salaire_edit.text() else None
-            prime = float(self.prime_edit.text()) if self.prime_edit.text() else None
+            salaire = float(self.salaire_edit.text()) if self.salaire_edit.text().isnumeric else None
+            prime = float(self.prime_edit.text()) if self.prime_edit.text().isnumeric else None
             email = self.email_edit.text()
-            supno = int(self.supervisor_combo.currentText().split("(ChNo: ")[1].split(")")[0]) if self.supervisor_combo.currentText() else None
-            labno = int(self.lab_combo.currentText().split("(LabNo: ")[1].split(")")[0]) if self.lab_combo.currentText() else None
-            facno = int(self.faculty_combo.currentText().split("(FacNo: ")[1].split(")")[0]) if self.faculty_combo.currentText() else None
+            supno = int(self.supervisor_combo.currentText().split("(ChNo: ")[1].split(")")[0]) if self.supervisor_combo.currentText().isnumeric else None
+            labno = int(self.lab_combo.currentText().split("(LabNo: ")[1].split(")")[0]) if self.lab_combo.currentText().isnumeric else None
+            facno = int(self.faculty_combo.currentText().split("(FacNo: ")[1].split(")")[0]) if self.faculty_combo.currentText().isnumeric else None
             connection = psycopg2.connect(
                 host="localhost",
                 database="biblio",
@@ -172,6 +176,5 @@ class AjouterChercheurDialog(QDialog):
             connection.close()
 
 
-    def show_error_message(self, message):
-            QMessageBox.critical(self, "Error", message, QMessageBox.Ok)
 
+    

@@ -50,6 +50,7 @@ class ChercheurInterface(QMainWindow):
         self.table_chercheurs.cellClicked.connect(self.handle_chercheur_selection)
         
         
+        
     def populate_chercheurs(self):
         connection = psycopg2.connect(
             host="localhost",
@@ -87,16 +88,20 @@ class ChercheurInterface(QMainWindow):
         connection.close()
 
 
+
     def show_ajouter_chercheur_dialog(self):
         dialog = AjouterChercheurDialog(self)
         dialog.exec_()
         self.populate_chercheurs()
 
+
+
     def modifier_chercheur(self):
         selected_row = self.table_chercheurs.currentRow()
         if selected_row == -1:
             self.show_error_message("Veuillez sélectionner un chercheur à modifier.")
-            
+            return 0
+        
         chercheur_info = {}
         for col in range(self.table_chercheurs.columnCount()):
             header = self.table_chercheurs.horizontalHeaderItem(col).text()
@@ -114,11 +119,12 @@ class ChercheurInterface(QMainWindow):
         selected_row = self.table_chercheurs.currentRow()
         if selected_row == -1:
             self.show_error_message("Veuillez sélectionner un chercheur à supprimer.")
-            
+            return 0
+        
         chno_item = self.table_chercheurs.item(selected_row, 0)
         if chno_item is None:
             self.show_error_message("Erreur lors de la récupération du numéro de chercheur.")
-            return
+            return 0
 
         chno = int(chno_item.text())
 
@@ -128,6 +134,7 @@ class ChercheurInterface(QMainWindow):
         if result == QDialog.Accepted:
             self.delete_chercheur(chno)
             self.populate_chercheurs() 
+    
     def delete_chercheur(self, chno):
         try:
             connection = psycopg2.connect(
@@ -148,20 +155,25 @@ class ChercheurInterface(QMainWindow):
         finally:
             connection.close()
 
+
         
     def consulter_articles(self):
         selected_row = self.table_chercheurs.currentRow()
         if selected_row == -1:
-            self.show_error_message("Veuillez sélectionner un chercheur à supprimer.")
+            self.show_error_message("Veuillez sélectionner un chercheur à Consulter.")
+            return 0
+            
         chno_item = self.table_chercheurs.item(selected_row, 0)
         
         if chno_item is None:
             self.show_error_message("Erreur lors de la récupération du numéro de chercheur.")
-            return
+            return 0
+        
         chno = int(chno_item.text())
         
         publication_interface = PublicationInterface(chno)
         publication_interface.exec_()
+
 
 
     def handle_chercheur_selection(self, row, col):
@@ -174,14 +186,8 @@ class ChercheurInterface(QMainWindow):
         self.chercheur_selected.emit(chercheur_info)
 
 
+
     def show_error_message(self, message):
             QMessageBox.critical(self, "Error", message, QMessageBox.Ok)
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = ChercheurInterface()
-    window.show()
-    sys.exit(app.exec_())
 
 

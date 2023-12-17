@@ -7,6 +7,7 @@ import psycopg2
 
 
 class ConfirmationDialog(QDialog):
+    
     def __init__(self, chno):
         super().__init__()
 
@@ -30,6 +31,3 @@ class ConfirmationDialog(QDialog):
         layout.addLayout(button_layout)
 
         self.setLayout(layout)
-    
-    def show_error_message(self, message):
-            QMessageBox.critical(self, "Error", message, QMessageBox.Ok)

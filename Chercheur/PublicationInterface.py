@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QTableWidget, QTableWidgetItem, QWidget,QApplication
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QTableWidget, QTableWidgetItem, QWidget,QMessageBox
 import psycopg2
 
 class PublicationInterface(QDialog):
@@ -40,6 +40,9 @@ class PublicationInterface(QDialog):
             """, (chno,))
 
             publications_data = cursor.fetchall()
+            
+            if not publications_data:
+                self.show_error_message(f"Le chercheur avec le numéro {chno} n'a pas de publications.")
 
             self.table_publications.setColumnCount(len(publications_data[0]))
             self.table_publications.setHorizontalHeaderLabels([
@@ -54,3 +57,5 @@ class PublicationInterface(QDialog):
 
         connection.close()
 
+    def show_error_message(self, message):
+        QMessageBox.critical(self, "Error", message, QMessageBox.Ok)

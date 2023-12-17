@@ -25,6 +25,7 @@ class ChercheurModificationDialog(QDialog):
         self.supervisor_combo = QComboBox(self)
 
         self.setup_ui(chercheur_info)
+    
     def setup_ui(self, chercheur_info):
         layout = QVBoxLayout(self)
 
@@ -51,10 +52,13 @@ class ChercheurModificationDialog(QDialog):
         self.btn_modifier = QPushButton("Modifier", self)
         self.btn_modifier.clicked.connect(self.handle_modifier)
         layout.addWidget(self.btn_modifier)
+    
     def add_label_and_widget(self, layout, label_text, widget):
         label = QLabel(label_text)
         layout.addWidget(label)
         layout.addWidget(widget)
+
+
 
     def populate_combo_boxes(self, chercheur_info):
         self.grade_combo.addItems(['E', 'D', 'A', 'MA', 'MC', 'PR'])
@@ -68,9 +72,11 @@ class ChercheurModificationDialog(QDialog):
 
         self.populate_lab_combo()
         self.lab_combo.setCurrentText(chercheur_info.get("Labnom"))
-
+        
         self.populate_supervisor_combo()
         self.supervisor_combo.setCurrentText(chercheur_info.get("Supnom"))
+    
+    
     
     def populate_faculty_combo(self):
         connection = psycopg2.connect(
@@ -87,6 +93,7 @@ class ChercheurModificationDialog(QDialog):
 
         finally:
             connection.close()
+    
     def populate_lab_combo(self):
         selected_faculty = self.faculty_combo.currentText()
 
@@ -109,6 +116,7 @@ class ChercheurModificationDialog(QDialog):
 
         finally:
             connection.close()
+    
     def populate_supervisor_combo(self):
         selected_faculty = self.faculty_combo.currentText()
         selected_lab = self.lab_combo.currentText()
@@ -135,13 +143,18 @@ class ChercheurModificationDialog(QDialog):
 
         finally:
             connection.close()
+    
     def on_faculty_combo_change(self):
         self.populate_lab_combo()
         self.populate_supervisor_combo()
+    
     def on_labo_combo_change(self):
         self.populate_supervisor_combo()
+    
     def show_error_message(self, message):
         QMessageBox.critical(self, "Error", message, QMessageBox.Ok)
+
+
 
     def handle_modifier(self):
         chno = int(self.chno)
