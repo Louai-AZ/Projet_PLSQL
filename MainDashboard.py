@@ -22,16 +22,16 @@ class MainDashboard(QMainWindow):
         self.label_overview = QLabel("Database Overview:")
         self.layout.addWidget(self.label_overview)
 
-        # Stacked widget to manage different sections
         self.stacked_widget = QStackedWidget()
         self.layout.addWidget(self.stacked_widget)
 
         self.display_overview()
 
         self.btn_chercheurs = QPushButton("Chercheurs Section")
+        self.chercheur_interface = ChercheurInterface()
         self.btn_chercheurs.clicked.connect(self.show_chercheurs_section)
         self.layout.addWidget(self.btn_chercheurs)
-
+        
         self.btn_laboratoires = QPushButton("Laboratoires Section")
         self.btn_laboratoires.clicked.connect(self.show_laboratoires_section)
         self.layout.addWidget(self.btn_laboratoires)
@@ -56,7 +56,6 @@ class MainDashboard(QMainWindow):
         )
 
         with connection.cursor() as cursor:
-            # Fetch faculties along with their laboratories and chercheur counts
             cursor.execute("""
                 SELECT
                     f.facno,
@@ -76,19 +75,16 @@ class MainDashboard(QMainWindow):
 
             faculties_and_labs = cursor.fetchall()
 
-            # Display the overview information
             overview_text = ""
             current_faculty = None
 
             for row in faculties_and_labs:
                 facno, facnom, labno, labnom, num_chercheurs = row
 
-                # Display faculty name only once
                 if facno != current_faculty:
                     overview_text += f"\nFaculty {facno}: {facnom}\n"
                     current_faculty = facno
 
-                # Display laboratory name and chercheur count
                 overview_text += f"  - Laboratory {labno}: {labnom} : Number of Chercheurs: {num_chercheurs}\n"
 
             self.label_overview.setText(overview_text)
@@ -97,9 +93,8 @@ class MainDashboard(QMainWindow):
 
 
     def show_chercheurs_section(self):
-        chercheur_interface = ChercheurInterface()
-        chercheur_interface.show()
-        print("Chercheurs Section clicked")
+        self.stacked_widget.addWidget(self.chercheur_interface)
+        self.stacked_widget.setCurrentWidget(self.chercheur_interface)
 
 
     def show_laboratoires_section(self):
@@ -123,9 +118,9 @@ class MainDashboard(QMainWindow):
         print("Publications Section clicked")
 
 
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainDashboard()
     window.show()
     sys.exit(app.exec_())
+
