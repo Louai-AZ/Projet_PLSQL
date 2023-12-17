@@ -144,7 +144,7 @@ class AjouterChercheurDialog(QDialog):
     def ajouter_chercheur(self):
         try:            
             chno = int(self.chno_edit.text()) if self.chno_edit.text().isnumeric else None
-            chnom = self.chnom_edit.text()
+            chnom = self.chnom_edit.text() 
             grade = self.grade_combo.currentText()
             statut = self.statut_combo.currentText()
             daterecrut = self.daterecrut_edit.date().toString(Qt.ISODate)

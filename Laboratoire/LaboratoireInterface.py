@@ -7,6 +7,7 @@ from PyQt5.QtCore import pyqtSignal
 import psycopg2
 from Laboratoire.AjouterLaboratoireDialog import AjouterLaboratoireDialog
 from Laboratoire.AfficherHierarchieDialog import AfficherHierarchieDialog
+from Laboratoire.HierarchieDialog import HierarchieDialog
 
 class LaboratoireInterface(QMainWindow):
 
@@ -74,6 +75,9 @@ class LaboratoireInterface(QMainWindow):
 
     def extraire_bibliographie(self):
         dialog = AfficherHierarchieDialog(self)
+
+    def afficher_hierarchie(self):
+        dialog = HierarchieDialog(self, labno=self.laboratoire_combo.currentText())
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

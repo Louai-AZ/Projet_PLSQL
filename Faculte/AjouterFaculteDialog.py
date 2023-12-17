@@ -32,32 +32,28 @@ class AjouterFaculteDialog(QDialog):
 
     def ajouter_faculte(self):
         try:
-            faculte_info = {
-                "facno": int(self.facno_edit.text()),
-                "facnom": self.facnom_edit.text(),
-                "adresse": self.adresse_edit.text(),
-                "libellé": self.libelle_edit.text()
-            }
-
-            self.add_faculte_to_database(faculte_info)
-
-            self.accept()
+            facno = int(self.facno_edit.text())  if self.facno_edit.text().isnumeric else None,
+            facnom = self.facnom_edit.text(),
+            adresse = self.adresse_edit.text(),
+            libelle = self.libelle_edit.text() 
+        
+            connection = psycopg2.connect(
+                host="localhost",
+                database="biblio",
+                user="postgres",
+                password="HOLUX"
+            )
+            with connection.cursor() as cursor:
+                cursor.execute("Insert Into Faculte Values (%s, %s,%s, %s)",(facno,facnom,adresse,libelle)
+                            )
+            connection.commit()
+            
+            self.close()
 
         except Exception as e:
             self.show_error_message(str(e))
-
-    def add_faculte_to_database(self, faculte_info):
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
-
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute("Insert Into Faculte Values ({}, {}, {}, {})"\
-                               .format(faculte_info["facno"], faculte_info["facnom"],
-                                       faculte_info["adresse"], faculte_info["libellé"]))
         finally:
-            connection
+            connection.close()
+
+    def show_error_message(self, message):
+        QMessageBox.critical(self, "Error", message, QMessageBox.Ok)

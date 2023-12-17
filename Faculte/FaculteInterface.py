@@ -32,6 +32,8 @@ class FaculteInterface(QMainWindow):
 
         self.populate_Faculte()
 
+
+
     def populate_Faculte(self):
         connection = psycopg2.connect(
             host="localhost",
@@ -62,14 +64,7 @@ class FaculteInterface(QMainWindow):
         connection.close()
 
 
-    def show_ajouter_chercheur_dialog(self):
+    def show_ajouter_faculte_dialog(self):
         dialog = AjouterFaculteDialog(self)
-        if dialog.exec_():
-            faculte_info = dialog.get_faculte_info()
-            self.chercheur_selected.emit(faculte_info)
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = FaculteInterface()
-    window.show()
-    sys.exit(app.exec_())
+        dialog.exec_()
+        self.populate_Faculte()
