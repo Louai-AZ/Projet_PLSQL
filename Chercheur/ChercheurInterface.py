@@ -5,10 +5,10 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import pyqtSignal
 import psycopg2
-from AjouterChercheurDialog import AjouterChercheurDialog
-from ChercheurModificationDialog import ChercheurModificationDialog
-from ConfirmationDialog import ConfirmationDialog
-from PublicationInterface import PublicationInterface
+from Chercheur.AjouterChercheurDialog import AjouterChercheurDialog
+from Chercheur.ChercheurModificationDialog import ChercheurModificationDialog
+from Chercheur.ConfirmationDialog import ConfirmationDialog
+from Chercheur.PublicationInterface import PublicationInterface
 
 class ChercheurInterface(QMainWindow):
     chercheur_selected = pyqtSignal(dict)
@@ -89,11 +89,8 @@ class ChercheurInterface(QMainWindow):
 
     def show_ajouter_chercheur_dialog(self):
         dialog = AjouterChercheurDialog(self)
-        if dialog.exec_():
-            chercheur_info = dialog.ajouter_chercheur()
-            if chercheur_info:
-                self.chercheur_selected.emit(chercheur_info)
-
+        dialog.exec_()
+        self.populate_chercheurs()
 
     def modifier_chercheur(self):
         selected_row = self.table_chercheurs.currentRow()
@@ -108,9 +105,9 @@ class ChercheurInterface(QMainWindow):
                 chercheur_info[header] = item.text()
 
         modification_dialog = ChercheurModificationDialog(chercheur_info, self)
-        if modification_dialog.exec_() == QDialog.Accepted:
-            self.modifier_chercheur()
-            self.populate_chercheurs()  
+        modification_dialog.exec_()
+        self.populate_chercheurs()
+
 
 
     def supprimer_chercheur(self):

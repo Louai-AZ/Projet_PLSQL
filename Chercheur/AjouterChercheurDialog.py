@@ -165,7 +165,7 @@ class AjouterChercheurDialog(QDialog):
             
             self.close()
 
-        except [Exception,psycopg2.Error] as e:
+        except psycopg2.Error as e:
             self.show_error_message(str(e))
 
         finally:
