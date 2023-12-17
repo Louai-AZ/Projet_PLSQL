@@ -33,7 +33,6 @@ class FaculteInterface(QMainWindow):
         self.populate_Faculte()
 
 
-
     def populate_Faculte(self):
         connection = psycopg2.connect(
             host="localhost",

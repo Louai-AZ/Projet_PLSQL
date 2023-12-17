@@ -33,6 +33,7 @@ class MainDashboard(QMainWindow):
         self.layout.addWidget(self.btn_chercheurs)
         
         self.btn_laboratoires = QPushButton("Laboratoires Section")
+        self.laboratoire_interface = LaboratoireInterface()
         self.btn_laboratoires.clicked.connect(self.show_laboratoires_section)
         self.layout.addWidget(self.btn_laboratoires)
 
@@ -99,18 +100,14 @@ class MainDashboard(QMainWindow):
 
 
     def show_laboratoires_section(self):
-        laboratoire_interface = LaboratoireInterface()
-        laboratoire_interface.show()
-        print("Laboratoires Section clicked")
+        self.stacked_widget.addWidget(self.laboratoire_interface)
+        self.stacked_widget.setCurrentWidget(self.laboratoire_interface)
 
 
 
     def show_facultes_section(self):
         self.stacked_widget.addWidget(self.faculte_interface)
         self.stacked_widget.setCurrentWidget(self.faculte_interface)
-        # faculte_interface = FaculteInterface()
-        # faculte_interface.show()
-        # print("Facultes Section clicked")
 
 
     def show_publications_section(self):
@@ -120,9 +117,4 @@ class MainDashboard(QMainWindow):
         print("Publications Section clicked")
 
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MainDashboard()
-    window.show()
-    sys.exit(app.exec_())
 

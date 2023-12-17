@@ -185,8 +185,6 @@ class ChercheurInterface(QMainWindow):
                 chercheur_info[header] = item.text()
         self.chercheur_selected.emit(chercheur_info)
 
-
-
     def show_error_message(self, message):
             QMessageBox.critical(self, "Error", message, QMessageBox.Ok)
 

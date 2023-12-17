@@ -1,15 +1,17 @@
 import sys
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QVBoxLayout,
+    QApplication, QMainWindow, QVBoxLayout,QMessageBox,
     QPushButton, QWidget, QTableWidget, QTableWidgetItem
 )
 from PyQt5.QtCore import pyqtSignal
 import psycopg2
 from Laboratoire.AjouterLaboratoireDialog import AjouterLaboratoireDialog
-from Laboratoire.AfficherHierarchieDialog import AfficherHierarchieDialog
 from Laboratoire.HierarchieDialog import HierarchieDialog
 
 class LaboratoireInterface(QMainWindow):
+
+    laboratoire_selected = pyqtSignal(dict)
+
 
     def __init__(self):
         super().__init__()
@@ -36,6 +38,9 @@ class LaboratoireInterface(QMainWindow):
         self.central_widget.setLayout(self.layout)
 
         self.populate_laboratoire()
+        
+        self.table_laboratoire.cellClicked.connect(self.handle_chercheur_selection)
+
 
     def populate_laboratoire(self):
         connection = psycopg2.connect(
@@ -48,15 +53,15 @@ class LaboratoireInterface(QMainWindow):
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT
-                    l.labno, l.labnom, l.facno
-                FROM Laboratoire l
+                    l.labno, l.labnom, f.facno , f.facnom
+                FROM Laboratoire l 
                 LEFT JOIN Faculte f ON l.facno = f.facno
             """)
             laboratoire_data = cursor.fetchall()
 
             self.table_laboratoire.setColumnCount(len(laboratoire_data[0]))
             self.table_laboratoire.setHorizontalHeaderLabels([
-                "Labno", "Labnom", "Facno"
+                "Labno", "Labnom", "Facno" , "Facnom"
             ])
 
             self.table_laboratoire.setRowCount(len(laboratoire_data))
@@ -67,20 +72,40 @@ class LaboratoireInterface(QMainWindow):
 
         connection.close()
 
+
     def show_ajouter_laboratoire_dialog(self):
         dialog = AjouterLaboratoireDialog(self)
-        if dialog.exec_():
-            laboratoire_info = dialog.get_laboratoire_info()
-            self.laboratoire_selected.emit(laboratoire_info)
+        dialog.exec_()
+        self.populate_laboratoire()
+            
 
-    def extraire_bibliographie(self):
-        dialog = AfficherHierarchieDialog(self)
+    def afficher_hierarchie(self):        
+        selected_row = self.table_laboratoire.currentRow()
+        if selected_row == -1:
+            self.show_error_message("Veuillez sélectionner un Laboratoire à Consulter.")
+            return 0
+            
+        labno_item = self.table_laboratoire.item(selected_row, 0)
+        
+        if labno_item is None:
+            self.show_error_message("Erreur lors de la récupération du numéro de laboratoire.")
+            return 0
+        
+        labno = int(labno_item.text())
+        
+        laboratoire_interface = HierarchieDialog(labno)
+        laboratoire_interface.exec_()
 
-    def afficher_hierarchie(self):
-        dialog = HierarchieDialog(self, labno=self.laboratoire_combo.currentText())
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = LaboratoireInterface()
-    window.show()
-    sys.exit(app.exec_())
+    def handle_chercheur_selection(self, row, col):
+        laboratoire_info = {}
+        for col in range(self.table_laboratoire.columnCount()):
+            header = self.table_laboratoire.horizontalHeaderItem(col).text()
+            item = self.table_laboratoire.item(row, col)
+            if item:
+                laboratoire_info[header] = item.text()
+        self.laboratoire_selected.emit(laboratoire_info)
+        
+        
+    def show_error_message(self, message):
+            QMessageBox.critical(self, "Error", message, QMessageBox.Ok)

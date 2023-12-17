@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QFormLayout, QLineEdit, QComboBox, QPushButton, QDateEdit
+from PyQt5.QtWidgets import QDialog, QFormLayout, QLineEdit, QComboBox, QPushButton, QDateEdit, QMessageBox
 from PyQt5.QtCore import Qt, QDate
 import psycopg2
 
@@ -35,62 +35,38 @@ class AjouterLaboratoireDialog(QDialog):
             user="postgres",
             password="HOLUX"
         )
-
         try:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT facnom FROM Faculte")
+                cursor.execute("SELECT facno, facnom FROM Faculte")
                 faculties = cursor.fetchall()
-                self.faculty_combo.addItems([fac[0] for fac in faculties])
+                self.faculty_combo.addItems([f"{fac[1]} (FacNo: {fac[0]})" for fac in faculties])
 
         finally:
             connection.close()
 
     def ajouter_laboratoire(self):
-        try:
-            laboratoire_info = {
-                "labno": int(self.labno_edit.text()),
-                "labnom": self.labnom_edit.text(),
-                "facno": self.get_facno()
-            }
-
-            self.add_laboratoire_to_database(laboratoire_info)
-
-            self.accept()
+        connection = psycopg2.connect(
+                host="localhost",
+                database="biblio",
+                user="postgres",
+                password="HOLUX"
+            )  
+        try:     
+            facno = int(self.faculty_combo.currentText().split("(FacNo: ")[1].split(")")[0]) if self.faculty_combo.currentText().isnumeric else None
+            labno = int(self.labno_edit.text()) if self.labno_edit.text().isnumeric else None 
+            labnom = self.labnom_edit.text(),
+                
+            with connection.cursor() as cursor:
+                cursor.execute("Insert Into laboratoire Values (%s, %s,%s)",
+                                    ( labno, labnom, facno))
+            connection.commit()
+            self.close()
 
         except Exception as e:
             self.show_error_message(str(e))
-
-    def get_facno(self):
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
-
-        try:
-            with connection.cursor() as cursor:
-                selected_faculty = self.faculty_combo.currentText()
-                cursor.execute("SELECT facno FROM Faculte WHERE facnom = %s", (selected_faculty,))
-                facno = cursor.fetchone()
-                return facno[0] if facno else None
-
         finally:
             connection.close()
 
-    def add_laboratoire_to_database(self, laboratoire_info):
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
 
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute("Insert Into Laboratoire Values ({}, {}, {})"\
-                               .format(laboratoire_info["labno"], laboratoire_info["labnom"],
-                                       laboratoire_info["facno"]))
-
-        finally:
-            connection
+    def show_error_message(self, message):
+        QMessageBox.critical(self, "Error", message, QMessageBox.Ok)

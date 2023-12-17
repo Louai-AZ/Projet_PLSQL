@@ -17,7 +17,7 @@ class PublicationInterface(QDialog):
         self.layout.addWidget(self.label)
 
         self.table_publications = QTableWidget(self)
-        self.layout.addWidget(self.table_publications, stretch=5)
+        self.layout.addWidget(self.table_publications)
 
         self.populate_publications(chno)
 
