@@ -1,26 +1,31 @@
-from PyQt5.QtWidgets import QTableWidgetItem, QDialog, QTableWidget, QFormLayout, QLineEdit, QComboBox, QPushButton, QDateEdit
+from PyQt5.QtWidgets import QTableWidgetItem, QDialog, QTableWidget, QWidget, QVBoxLayout, QLabel, QMessageBox
 from PyQt5.QtCore import Qt, QDate
 import psycopg2
 
-class BibliographieDialog(QDialog):
-    pubno = ""
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+class BibliographieDialog(QDialog):
+    
+    def __init__(self, pubno):
+        super().__init__()
 
         self.setWindowTitle("Bibliographie")
         self.setGeometry(200, 200, 400, 300)
 
-        self.layout = QFormLayout()
+        self.central_widget = QWidget(self)
+
+        self.layout = QVBoxLayout()
+
+        self.label = QLabel(f"Chercheurs for Publication with Pabno: {pubno}")
+        self.layout.addWidget(self.label)
 
         self.table_chercheurs = QTableWidget(self)
         self.layout.addWidget(self.table_chercheurs)
 
-        self.populate_chercheurs()
+        self.populate_chercheurs(pubno)
 
-        self.setLayout(self.layout)
+        self.central_widget.setLayout(self.layout)
 
-    def populate_chercheurs(self):
+    def populate_chercheurs(self,pubno):
         connection = psycopg2.connect(
             host="localhost",
             database="biblio",
@@ -38,17 +43,22 @@ class BibliographieDialog(QDialog):
                 LEFT JOIN Chercheur s ON c.supno = s.chno
                 LEFT JOIN Laboratoire l ON c.labno = l.labno
                 LEFT JOIN Faculte f ON c.facno = f.facno
-                WHERE c.chno = (
-                SELECT chno FROM Publier pr
-                LEFT JOIN Publication pn ON pr.pubno = pn.pubno
-                WHERE pn.pubno = %s )
-            """, (self.pubno))
+                WHERE c.chno IN (
+                    SELECT pr.chno
+                    FROM Publier pr
+                    WHERE pr.pubno = %s
+                )
+            """, (pubno,))
+
             chercheurs_data = cursor.fetchall()
+
+            if not chercheurs_data:
+                self.show_error_message(f"La publication avec le numéro {pubno} n'admet pas des chercheurs.")
+                return 0
 
             self.table_chercheurs.setColumnCount(len(chercheurs_data[0]))
             self.table_chercheurs.setHorizontalHeaderLabels([
-                "Chno", "Chnom", "Grade", "Statut", "DateRecrut", "Salaire",
-                "Prime", "Email", "Supnom", "Labnom", "Facnom"
+                "Chno", "Chnom", "Grade", "Statut", "DateRecrut","Email", "Supnom", "Labnom", "Facnom"
             ])
 
             self.table_chercheurs.setRowCount(len(chercheurs_data))
@@ -58,3 +68,6 @@ class BibliographieDialog(QDialog):
                     self.table_chercheurs.setItem(row, col, item)
 
         connection.close()
+        
+    def show_error_message(self, message):
+        QMessageBox.critical(self, "Error", message, QMessageBox.Ok)

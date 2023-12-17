@@ -43,6 +43,7 @@ class MainDashboard(QMainWindow):
         self.layout.addWidget(self.btn_facultes)
 
         self.btn_publications = QPushButton("Publications Section")
+        self.publication_interface = PublicationInterface()
         self.btn_publications.clicked.connect(self.show_publications_section)
         self.layout.addWidget(self.btn_publications)
 
@@ -111,10 +112,8 @@ class MainDashboard(QMainWindow):
 
 
     def show_publications_section(self):
-        # Implement logic to show the Publications section
-        publication_interface = PublicationInterface()
-        publication_interface.show()
-        print("Publications Section clicked")
+        self.stacked_widget.addWidget(self.publication_interface)
+        self.stacked_widget.setCurrentWidget(self.publication_interface)
 
 
 

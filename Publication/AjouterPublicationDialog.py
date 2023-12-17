@@ -1,6 +1,7 @@
-from PyQt5.QtWidgets import QDialog, QFormLayout, QLineEdit, QComboBox, QPushButton, QDateEdit
+from PyQt5.QtWidgets import QDialog, QFormLayout, QLineEdit, QComboBox, QPushButton, QDateEdit,QMessageBox
 from PyQt5.QtCore import Qt, QDate
 import psycopg2
+
 
 class AjouterPublicationDialog(QDialog):
 
@@ -62,71 +63,48 @@ class AjouterPublicationDialog(QDialog):
         try:
             with connection.cursor() as cursor:
                 cursor.execute(
-                    "SELECT chnom FROM Chercheur")
+                    "SELECT chno,chnom FROM Chercheur")
                 chercheurs = cursor.fetchall()
-                self.chercheur_combo.addItems([chercheur[0] for chercheur in chercheurs])
+                self.chercheur_combo.addItems([f"{chercheur[1]} (Chno: {chercheur[0]})" for chercheur in chercheurs])
 
         finally:
             connection.close()
 
     def ajouter_publication(self):
+        connection = psycopg2.connect(
+            host="localhost",
+            database="biblio",
+            user="postgres",
+            password="HOLUX"
+        )
+        
         try:
-            publication_info = {
-                "pubno": self.pubno_edit.text(),
-                "titre": self.titre_edit.text(),
-                "theme": self.theme_edit.text(),
-                "type": self.type_combo.currentText(),
-                "volume": int(self.volume_edit.text()),
-                "date": self.date_edit.date().toString(Qt.ISODate),
-                "apparition": self.apparition_edit.text(),
-                "editeur": self.editeur_edit.text(),
-                "rang": int(self.rang_edit.text()),
-                "chno": self.get_chercheur_chno()
-            }
+            pubno = self.pubno_edit.text(),
+            titre = self.titre_edit.text(),
+            theme = self.theme_edit.text(),
+            type = self.type_combo.currentText(),
+            volume = int(self.volume_edit.text())  if self.volume_edit.text().isnumeric else None ,
+            date = self.date_edit.date().toString(Qt.ISODate),
+            apparition = self.apparition_edit.text(),
+            editeur = self.editeur_edit.text(),
+            rang = int(self.rang_edit.text()) if self.rang_edit.text().isnumeric else None ,
+            chno = int(self.chercheur_combo.currentText().split("(Chno: ")[1].split(")")[0]) if self.chercheur_combo.currentText().isnumeric else None
+            
 
-            self.add_publication_to_database(publication_info)
-
-            self.accept()
+            with connection.cursor() as cursor:
+                cursor.execute("Insert Into Publication Values (%s, %s, %s, %s, %s, %s, %s, %s)",
+                            (pubno, titre,theme, type,volume, date, apparition, editeur))
+                
+                cursor.execute("Insert Into Publier Values (%s, %s, %s)",
+                            (chno, pubno,rang))
+            connection.commit()
+            self.close()
 
         except Exception as e:
             self.show_error_message(str(e))
-
-    def get_chercheur_chno(self):
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
-
-        try:
-            with connection.cursor() as cursor:
-                selected_chercheur = self.chercheur_combo.currentText()
-                cursor.execute("SELECT chno FROM Chercheur WHERE chnom = %s", (selected_chercheur,))
-                chercheur_chno = cursor.fetchone()
-                return chercheur_chno[0] if chercheur_chno else None
-
         finally:
-            connection
+            connection.close()
 
-    def add_publication_to_database(self, publication_info):
-        connection = psycopg2.connect(
-            host="localhost",
-            database="biblio",
-            user="postgres",
-            password="HOLUX"
-        )
 
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute("Insert Into Publication Values ({}, {}, {}, {}, {}, {}, {}, {})"\
-                               .format(publication_info["pubno"], publication_info["titre"],
-                                       publication_info["theme"], publication_info["type"],
-                                       publication_info["volume"], publication_info["date"],
-                                       publication_info["apparition"], publication_info["editeur"]))
-                cursor.execute("Insert Into Publier Values ({}, {}, {})"\
-                               .format(publication_info["chno"], publication_info["pubno"],
-                                       publication_info["rang"]))
-
-        finally:
-            connection
+    def show_error_message(self, message):
+        QMessageBox.critical(self, "Error", message, QMessageBox.Ok)

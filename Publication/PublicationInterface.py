@@ -1,12 +1,18 @@
 import sys
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QVBoxLayout,
+    QApplication, QMainWindow, QVBoxLayout,QMessageBox,
     QPushButton, QWidget, QTableWidget, QTableWidgetItem
 )
 import psycopg2
+from PyQt5.QtCore import pyqtSignal
 from Publication.AjouterPublicationDialog import AjouterPublicationDialog
+from Publication.BibliographieDialog import BibliographieDialog
 from Publication.ExtraireBibliographieDialog import ExtraireBibliographieDialog
+
+
 class PublicationInterface(QMainWindow):
+
+    publication_selected = pyqtSignal(dict)
 
     def __init__(self):
         super().__init__()
@@ -48,7 +54,7 @@ class PublicationInterface(QMainWindow):
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT
-                    pubno, titre, theme, type, volume, date, apparition,
+                    pubno, titre, theme, type_p, volume_p, date_p, apparition,
                     editeur
                 FROM Publication
             """)
@@ -70,12 +76,27 @@ class PublicationInterface(QMainWindow):
 
     def show_ajouter_publication_dialog(self):
         dialog = AjouterPublicationDialog(self)
-        if dialog.exec_():
-            publication_info = dialog.get_publication_info()
-            self.publication_selected.emit(publication_info)
+        dialog.exec_()
+        self.populate_publication()
+        
+    
+    def extraire_bibliographie(self):        
+        selected_row = self.table_publication.currentRow()
+        if selected_row == -1:
+            self.show_error_message("Veuillez sélectionner une Publication à Consulter.")
+            return 0
+            
+        pubno_item = self.table_publication.item(selected_row, 0)
+        
+        if pubno_item is None:
+            self.show_error_message("Erreur lors de la récupération du numéro de publication.")
+            return 0
+        
+        pubno = pubno_item.text()
+        
+        bib_interface = BibliographieDialog(pubno)
+        bib_interface.exec_()   
 
-    def extraire_bibliographie(self):
-        dialog = ExtraireBibliographieDialog(self)
 
     def handle_publication_selection(self, row, col):
         publication_info = {}
@@ -86,8 +107,6 @@ class PublicationInterface(QMainWindow):
                 publication_info[header] = item.text()
         self.publication_selected.emit(publication_info)
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = PublicationInterface()
-    window.show()
-    sys.exit(app.exec_())
+
+    def show_error_message(self, message):
+            QMessageBox.critical(self, "Error", message, QMessageBox.Ok)
