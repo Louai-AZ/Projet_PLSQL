@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QLabel, QVBoxLayout, QHBoxLayout,
-    QPushButton, QWidget, QTableWidget, QTableWidgetItem, QGroupBox
+    QApplication, QMainWindow, QVBoxLayout,
+    QPushButton, QWidget, QTableWidget, QTableWidgetItem
 )
 from PyQt5.QtCore import pyqtSignal
 import psycopg2
@@ -89,14 +89,12 @@ class ChercheurInterface(QMainWindow):
 
         connection.close()
 
-
     def show_ajouter_chercheur_dialog(self):
         dialog = AjouterChercheurDialog(self)
         if dialog.exec_():
             # Dialog was accepted (user clicked "Ajouter" in the dialog)
             chercheur_info = dialog.get_chercheur_info()
             self.chercheur_selected.emit(chercheur_info)
-
 
     def modifier_chercheur(self):
         # Implement logic to modify the selected chercheur
@@ -110,7 +108,6 @@ class ChercheurInterface(QMainWindow):
         # Implement logic to consult articles for the selected chercheur
         print("Consulter Articles clicked")
 
-
     def handle_chercheur_selection(self, row, col):
         # Retrieve chercheur information for the selected row
         chercheur_info = {}
@@ -122,11 +119,8 @@ class ChercheurInterface(QMainWindow):
         # Emit the signal with the selected chercheur's information
         self.chercheur_selected.emit(chercheur_info)
 
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = ChercheurInterface()
     window.show()
     sys.exit(app.exec_())
-
-

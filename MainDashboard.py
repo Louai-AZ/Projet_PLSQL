@@ -1,7 +1,10 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QPushButton, QWidget, QStackedWidget
 import psycopg2
-from ChercheurInterface import ChercheurInterface  
+from ChercheurInterface import ChercheurInterface
+from PublicationInterface import PublicationInterface
+from LaboratoireInterface import LaboratoireInterface
+from FaculteInterface import FaculteInterface
 
 class MainDashboard(QMainWindow):
     
@@ -45,7 +48,6 @@ class MainDashboard(QMainWindow):
 
 
     def display_overview(self):
-        # Connect to your PostgreSQL database
         connection = psycopg2.connect(
             host="localhost",
             database="biblio",
@@ -102,16 +104,22 @@ class MainDashboard(QMainWindow):
 
     def show_laboratoires_section(self):
         # Implement logic to show the Laboratoires section
+        laboratoire_interface = LaboratoireInterface()
+        laboratoire_interface.show()
         print("Laboratoires Section clicked")
 
 
     def show_facultes_section(self):
         # Implement logic to show the Facultes section
+        faculte_interface = FaculteInterface()
+        faculte_interface.show()
         print("Facultes Section clicked")
 
 
     def show_publications_section(self):
         # Implement logic to show the Publications section
+        publication_interface = PublicationInterface()
+        publication_interface.show()
         print("Publications Section clicked")
 
 
