@@ -1,10 +1,10 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QPushButton, QWidget, QStackedWidget
 import psycopg2
-from ChercheurInterface import ChercheurInterface
-from PublicationInterface import PublicationInterface
-from LaboratoireInterface import LaboratoireInterface
-from FaculteInterface import FaculteInterface
+from Chercheur.ChercheurInterface import ChercheurInterface
+from Publication.PublicationInterface import PublicationInterface
+from Laboratoire.LaboratoireInterface import LaboratoireInterface
+from Faculte.FaculteInterface import FaculteInterface
 
 class MainDashboard(QMainWindow):
     
