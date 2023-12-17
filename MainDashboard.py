@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QPushButton, QWidget, QStackedWidget
 import psycopg2
-from ChercheurInterface import ChercheurInterface
+from Chercheur.ChercheurInterface import ChercheurInterface
 
 class MainDashboard(QMainWindow):
     
@@ -25,9 +25,10 @@ class MainDashboard(QMainWindow):
         self.display_overview()
 
         self.btn_chercheurs = QPushButton("Chercheurs Section")
+        self.chercheur_interface = ChercheurInterface()
         self.btn_chercheurs.clicked.connect(self.show_chercheurs_section)
         self.layout.addWidget(self.btn_chercheurs)
-
+        
         self.btn_laboratoires = QPushButton("Laboratoires Section")
         self.btn_laboratoires.clicked.connect(self.show_laboratoires_section)
         self.layout.addWidget(self.btn_laboratoires)
@@ -89,11 +90,8 @@ class MainDashboard(QMainWindow):
 
 
     def show_chercheurs_section(self):
-        # app = QApplication([])
-        window = ChercheurInterface()
-        window.show()
-        # sys.exit(app.exec_())
-        # self.close()
+        self.stacked_widget.addWidget(self.chercheur_interface)
+        self.stacked_widget.setCurrentWidget(self.chercheur_interface)
 
 
     def show_laboratoires_section(self):

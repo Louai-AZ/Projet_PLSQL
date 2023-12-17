@@ -75,7 +75,6 @@ class ChercheurModificationDialog(QDialog):
         self.supervisor_combo.setCurrentText(chercheur_info.get("Supnom"))
     
     
-    
     def populate_faculty_combo(self):
         connection = psycopg2.connect(
             host="localhost",
@@ -142,12 +141,13 @@ class ChercheurModificationDialog(QDialog):
         finally:
             connection.close()
 
-
     def on_faculty_combo_change(self):
         self.populate_lab_combo()
         self.populate_supervisor_combo()
+
     def on_labo_combo_change(self):
         self.populate_supervisor_combo()
+
 
     def handle_modifier(self):
         chno = int(self.chno)

@@ -11,7 +11,7 @@ class AjouterChercheurDialog(QDialog):
         super().__init__(parent)
 
         self.setWindowTitle("Ajouter Chercheur")
-        self.setGeometry(200, 200, 400, 300)
+        self.setGeometry(400, 400, 400, 400)
 
         self.layout = QFormLayout()
 
@@ -79,7 +79,6 @@ class AjouterChercheurDialog(QDialog):
         finally:
             connection.close()
 
-
     def populate_lab_combo(self):
         selected_faculty = self.faculty_combo.currentText()
 
@@ -102,7 +101,6 @@ class AjouterChercheurDialog(QDialog):
 
         finally:
             connection.close()
-
 
     def populate_supervisor_combo(self):
         selected_faculty = self.faculty_combo.currentText()
@@ -131,13 +129,13 @@ class AjouterChercheurDialog(QDialog):
         finally:
             connection.close()
 
-
     def on_faculty_combo_change(self):
         self.populate_lab_combo()
         self.populate_supervisor_combo()
 
     def on_labo_combo_change(self):
         self.populate_supervisor_combo()
+
 
     def ajouter_chercheur(self):
         try:            
