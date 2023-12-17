@@ -50,6 +50,7 @@ class AjouterChercheurDialog(QDialog):
         self.lab_combo = QComboBox(self)
         self.populate_lab_combo()
         self.layout.addRow("Laboratoire:", self.lab_combo)
+        self.lab_combo.currentTextChanged.connect(self.on_labo_combo_change)
 
         self.supervisor_combo = QComboBox(self)
         self.populate_supervisor_combo()
@@ -135,6 +136,8 @@ class AjouterChercheurDialog(QDialog):
         self.populate_lab_combo()
         self.populate_supervisor_combo()
 
+    def on_labo_combo_change(self):
+        self.populate_supervisor_combo()
 
     def ajouter_chercheur(self):
         try:            
