@@ -43,6 +43,7 @@ class PublicationInterface(QDialog):
             
             if not publications_data:
                 self.show_error_message(f"Le chercheur avec le numéro {chno} n'a pas de publications.")
+                return 0
 
             self.table_publications.setColumnCount(len(publications_data[0]))
             self.table_publications.setHorizontalHeaderLabels([
