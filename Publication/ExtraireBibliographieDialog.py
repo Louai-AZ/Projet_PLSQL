@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QDialog, QFormLayout, QLineEdit, QComboBox, QPushButton, QDateEdit
 from PyQt5.QtCore import Qt, QDate
 import psycopg2
-from BibliographieDialog import BibliographieDialog
+from Publication.BibliographieDialog import BibliographieDialog
 
 class ExtraireBibliographieDialog(QDialog):
 

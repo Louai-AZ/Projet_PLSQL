@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import pyqtSignal
 import psycopg2
-from AjouterLaboratoireDialog import AjouterLaboratoireDialog
+from Laboratoire.AjouterLaboratoireDialog import AjouterLaboratoireDialog
 from Laboratoire.AfficherHierarchieDialog import AfficherHierarchieDialog
 
 class LaboratoireInterface(QMainWindow):

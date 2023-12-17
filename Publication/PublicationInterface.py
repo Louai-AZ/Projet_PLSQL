@@ -4,9 +4,8 @@ from PyQt5.QtWidgets import (
     QPushButton, QWidget, QTableWidget, QTableWidgetItem
 )
 import psycopg2
-from AjouterPublicationDialog import AjouterPublicationDialog
-from ExtraireBibliographieDialog import ExtraireBibliographieDialog
-
+from Publication.AjouterPublicationDialog import AjouterPublicationDialog
+from Publication.ExtraireBibliographieDialog import ExtraireBibliographieDialog
 class PublicationInterface(QMainWindow):
 
     def __init__(self):
