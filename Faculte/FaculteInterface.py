@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import pyqtSignal
 import psycopg2
-from AjouterFaculteDialog import AjouterFaculteDialog
+from Faculte.AjouterFaculteDialog import AjouterFaculteDialog
 
 class FaculteInterface(QMainWindow):
     faculte_selected = pyqtSignal(dict)
