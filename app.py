@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QApplication
 from MainDashboard import MainDashboard
+from Chercheur.ChercheurInterface import ChercheurInterface
 
 def main():
     app = QApplication([])

@@ -1,13 +1,14 @@
 import sys
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout,
-    QPushButton, QWidget, QTableWidget, QTableWidgetItem,QDialog,QMessageBox
+    QPushButton, QWidget, QTableWidget, QTableWidgetItem,QDialog,QMessageBox ,QStackedWidget
 )
 from PyQt5.QtCore import pyqtSignal
 import psycopg2
 from AjouterChercheurDialog import AjouterChercheurDialog
 from ChercheurModificationDialog import ChercheurModificationDialog
 from ConfirmationDialog import ConfirmationDialog
+from PublicationInterface import PublicationInterface
 
 class ChercheurInterface(QMainWindow):
     chercheur_selected = pyqtSignal(dict)
@@ -16,7 +17,7 @@ class ChercheurInterface(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("Chercheur Interface")
-        self.setGeometry(100, 100, 800, 600)
+        self.setGeometry(250, 250, 1400, 600)
 
         self.central_widget = QWidget(self)
         self.setCentralWidget(self.central_widget)
@@ -39,13 +40,9 @@ class ChercheurInterface(QMainWindow):
         self.layout.addWidget(self.btn_supprimer)
 
         self.btn_consulter_articles = QPushButton("Consulter Articles", self)
-        self.btn_consulter_articles.clicked.connect(self.consulter_articles)
         self.layout.addWidget(self.btn_consulter_articles)
+        self.btn_consulter_articles.clicked.connect(self.consulter_articles)
         
-        self.btn_back = QPushButton("Back to Main Dashboard", self)
-        #self.btn_back.clicked.connect(self.return_to_main_dashboard)
-        self.layout.addWidget(self.btn_back)
-
         self.central_widget.setLayout(self.layout)
 
         self.populate_chercheurs()
@@ -98,10 +95,6 @@ class ChercheurInterface(QMainWindow):
                 self.chercheur_selected.emit(chercheur_info)
 
 
-    def handle_chercheur_added(self):
-        self.populate_chercheurs()
-
-
     def modifier_chercheur(self):
         selected_row = self.table_chercheurs.currentRow()
         if selected_row == -1:
@@ -118,7 +111,6 @@ class ChercheurInterface(QMainWindow):
         if modification_dialog.exec_() == QDialog.Accepted:
             self.modifier_chercheur()
             self.populate_chercheurs()  
-
 
 
     def supprimer_chercheur(self):
@@ -159,9 +151,20 @@ class ChercheurInterface(QMainWindow):
         finally:
             connection.close()
 
-
+        
     def consulter_articles(self):
-        print("Consulter Articles clicked")
+        selected_row = self.table_chercheurs.currentRow()
+        if selected_row == -1:
+            self.show_error_message("Veuillez sélectionner un chercheur à supprimer.")
+        chno_item = self.table_chercheurs.item(selected_row, 0)
+        
+        if chno_item is None:
+            self.show_error_message("Erreur lors de la récupération du numéro de chercheur.")
+            return
+        chno = int(chno_item.text())
+        
+        publication_interface = PublicationInterface(chno)
+        publication_interface.exec_()
 
 
     def handle_chercheur_selection(self, row, col):
