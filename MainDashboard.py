@@ -2,6 +2,9 @@ import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QPushButton, QWidget, QStackedWidget
 import psycopg2
 from Chercheur.ChercheurInterface import ChercheurInterface
+from Publication.PublicationInterface import PublicationInterface
+from Laboratoire.LaboratoireInterface import LaboratoireInterface
+from Faculte.FaculteInterface import FaculteInterface
 
 class MainDashboard(QMainWindow):
     
@@ -96,16 +99,28 @@ class MainDashboard(QMainWindow):
 
     def show_laboratoires_section(self):
         # Implement logic to show the Laboratoires section
+        laboratoire_interface = LaboratoireInterface()
+        laboratoire_interface.show()
         print("Laboratoires Section clicked")
 
 
     def show_facultes_section(self):
         # Implement logic to show the Facultes section
+        faculte_interface = FaculteInterface()
+        faculte_interface.show()
         print("Facultes Section clicked")
 
 
     def show_publications_section(self):
         # Implement logic to show the Publications section
+        publication_interface = PublicationInterface()
+        publication_interface.show()
         print("Publications Section clicked")
 
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainDashboard()
+    window.show()
+    sys.exit(app.exec_())
 

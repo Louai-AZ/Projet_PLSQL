@@ -190,4 +190,3 @@ class ChercheurInterface(QMainWindow):
     def show_error_message(self, message):
             QMessageBox.critical(self, "Error", message, QMessageBox.Ok)
 
-
